@@ -36,6 +36,7 @@ class NYRenderer
 		GLuint _DepthTexPP; ///< Rendu du buffer de profondeur, pour post process
 		GLuint _FBO; ///< Front buffer Object : pour effectuer un render to texture
 		GLuint _ProgramPP; ///< Le programme de shader pour le post process
+		GLuint _ProgramCube; ///< Le programme de shader pour le rendu d'un cube
 
 		NYColor _BackGroundColor; ///< Couleur de fond. La modifier avec setBackgroundColor()
 
@@ -45,6 +46,9 @@ class NYRenderer
 
 		static float _DeltaTime; ///< Temps écoulé depuis la dernière frame (passe a la fonction render)
 		static float _DeltaTimeCumul; ///< Temps écoulé depuis le lancement de l'appli
+
+		// Params
+		float _Wave_amplitude = 5.f;
 
 	private : 
 		static NYRenderer * _Me; ///< Singleton
@@ -406,6 +410,11 @@ class NYRenderer
 		}
 
 	private:
+
+		void initShadersCube()
+		{
+			_ProgramCube = createProgram("../base/shaders/pscube.glsl", "../base/shaders/vscube.glsl");
+		}
 
 		void initShadersPostProcess(void)
 		{

@@ -20,11 +20,13 @@ class NYChunk
 		static float _WorldCols[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE*3*4*6]; ///< Buffer pour les couleurs
 		static float _WorldNorm[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE*3*4*6]; ///< Buffer pour les normales
 		static float _WorldUV[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE * 2 * 4 * 6];
+		static float _WorldAttr[CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE * 1 * 4 * 6];
 
 		static const int SIZE_VERTICE = 3 * sizeof(float); ///< Taille en octets d'un vertex dans le VBO
 		static const int SIZE_COLOR = 3 * sizeof(float);  ///< Taille d'une couleur dans le VBO
 		static const int SIZE_NORMAL = 3 * sizeof(float);  ///< Taille d'une normale dans le VBO
 		static const int SIZE_UV = 2 * sizeof(float);
+		static const int SIZE_ATTR = 1 * sizeof(float);  /// size of a float attribute
 
 		int _NbVertices; ///< Nombre de vertices dans le VBO (on ne met que les faces visibles)
 
@@ -71,6 +73,7 @@ class NYChunk
 			float * ptCols = _WorldCols;
 			float * ptNorm = _WorldNorm;
 			float * ptUV = _WorldUV;
+			float * ptAttr = _WorldAttr;
 
 			_NbVertices = 0;
 
@@ -84,6 +87,7 @@ class NYChunk
 						if (_Cubes[x][y][z]._Draw && _Cubes[x][y][z]._Type != CUBE_AIR)
 						{
 							float color[3];
+							float wave_amplitude = 0.f;
 
 							switch (_Cubes[x][y][z]._Type)
 							{
@@ -122,6 +126,13 @@ class NYChunk
 								&cubeYPrev, &cubeYNext,
 								&cubeZPrev, &cubeZNext);
 
+							// only apply wave effect for water surface, and on concerned vertices
+							if (_Cubes[x][y][z]._Type == CUBE_EAU && (cubeZNext == nullptr || cubeZNext->_Type == CUBE_AIR))
+							{
+								// parametered by slider, but since chunks are created at init, the slider alone does not work without reset/update chunk
+								wave_amplitude = NYRenderer::getInstance()->_Wave_amplitude;
+							}
+
 							//Premier QUAD (le z-)
 							if (cubeZPrev == NULL || cubeZPrev->isSolid() == false)
 							{
@@ -140,6 +151,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = -1; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
 
 
 
@@ -158,6 +170,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = -1; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 
@@ -176,6 +190,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = -1; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 								*ptVert = xPos; ptVert++;
@@ -193,6 +209,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = -1; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
 
 
 							}
@@ -217,6 +234,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
@@ -234,6 +253,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
@@ -250,6 +271,9 @@ class NYChunk
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								// only vertices at Z+ receive wave, if any
+								*ptAttr = wave_amplitude; ptAttr++;
 
 
 
@@ -268,6 +292,8 @@ class NYChunk
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = wave_amplitude; ptAttr++;
 							}
 
 							//Troisieme QUAD (x-)
@@ -288,6 +314,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 								*ptVert = xPos; ptVert++;
@@ -305,6 +333,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = wave_amplitude; ptAttr++;
+
 
 
 								*ptVert = xPos; ptVert++;
@@ -321,6 +351,8 @@ class NYChunk
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = wave_amplitude; ptAttr++;
 
 
 
@@ -340,6 +372,8 @@ class NYChunk
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = 0; ptAttr++;
 							}
 
 
@@ -361,6 +395,8 @@ class NYChunk
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 								*ptVert = xPos; ptVert++;
@@ -378,6 +414,8 @@ class NYChunk
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = wave_amplitude; ptAttr++;
+
 
 
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
@@ -394,6 +432,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = wave_amplitude; ptAttr++;
 
 
 
@@ -413,6 +453,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = 0; ptAttr++;
 							}
 
 							//Cinquieme QUAD (y-)
@@ -433,6 +475,7 @@ class NYChunk
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
 
 
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
@@ -450,6 +493,8 @@ class NYChunk
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
+								*ptAttr = 0; ptAttr++;
+
 
 
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
@@ -466,6 +511,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = wave_amplitude; ptAttr++;
 
 
 
@@ -484,6 +531,9 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
+
+								*ptAttr = wave_amplitude; ptAttr++;
+
 							}
 
 							//Sixieme QUAD (z+)
@@ -503,6 +553,9 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
+								
+								*ptAttr = wave_amplitude; ptAttr++;
+
 
 
 
@@ -521,6 +574,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 
+								*ptAttr = wave_amplitude; ptAttr++;
+
 
 
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
@@ -538,6 +593,8 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 
+								*ptAttr = wave_amplitude; ptAttr++;
+
 
 
 								*ptVert = xPos; ptVert++;
@@ -554,6 +611,10 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
+
+								*ptAttr = wave_amplitude; ptAttr++;
+
+
 							}
 						}
 					}
@@ -571,7 +632,8 @@ class NYChunk
 				_NbVertices * SIZE_VERTICE +
 				_NbVertices * SIZE_COLOR +
 				_NbVertices * SIZE_NORMAL +
-				_NbVertices * SIZE_UV,
+				_NbVertices * SIZE_UV +
+				_NbVertices * SIZE_ATTR,
 				NULL,
 				GL_STATIC_DRAW);
 
@@ -606,11 +668,22 @@ class NYChunk
 
 			error = glGetError();
 
+			glBufferSubData(GL_ARRAY_BUFFER,
+				_NbVertices * SIZE_VERTICE +
+				_NbVertices * SIZE_COLOR +
+				_NbVertices * SIZE_NORMAL +
+				_NbVertices * SIZE_UV,
+				_NbVertices * SIZE_ATTR,
+				_WorldAttr);
+
+			error = glGetError();
+
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
 		void render(void)
 		{
+			// for debug, remove when using textures
 			glEnable(GL_COLOR_MATERIAL);
 			glEnable(GL_LIGHTING);
 
@@ -623,12 +696,16 @@ class NYChunk
 			glEnableClientState(GL_COLOR_ARRAY);
 			glEnableClientState(GL_NORMAL_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			GLuint wave_amplitude_loc = glGetAttribLocation(NYRenderer::getInstance()->_ProgramCube, "wave_amplitude");
+			glEnableVertexAttribArray(wave_amplitude_loc);
 
 			//On place les pointeurs sur les datas, aux bons offsets
 			glVertexPointer(3, GL_FLOAT, 0, (void*)(0));
 			glColorPointer(3, GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE));
 			glNormalPointer(GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR));
 			glTexCoordPointer(2, GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL));
+			// pointer on wave amplitude attribute data, so that earth and water blocks are drawn with the correct wave effect
+			glVertexAttribPointer(wave_amplitude_loc, 1, GL_FLOAT, false, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL + _NbVertices*SIZE_UV));
 
 			//On demande le dessin
 			//glDrawArrays(GL_TRIANGLES, 0, _NbVertices);
