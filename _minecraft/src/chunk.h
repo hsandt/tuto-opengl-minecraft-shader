@@ -633,7 +633,8 @@ class NYChunk
 				_NbVertices * SIZE_COLOR +
 				_NbVertices * SIZE_NORMAL +
 				_NbVertices * SIZE_UV +
-				_NbVertices * SIZE_ATTR,
+				_NbVertices * SIZE_ATTR +
+				0,
 				NULL,
 				GL_STATIC_DRAW);
 
@@ -705,7 +706,7 @@ class NYChunk
 			glNormalPointer(GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR));
 			glTexCoordPointer(2, GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL));
 			// pointer on wave amplitude attribute data, so that earth and water blocks are drawn with the correct wave effect
-			glVertexAttribPointer(wave_amplitude_loc, 1, GL_FLOAT, false, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL + _NbVertices*SIZE_UV));
+			glVertexAttribPointer(wave_amplitude_loc, 1, GL_FLOAT, GL_FALSE, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL + _NbVertices*SIZE_UV));
 
 			//On demande le dessin
 			//glDrawArrays(GL_TRIANGLES, 0, _NbVertices);
@@ -715,6 +716,7 @@ class NYChunk
 			glDisableClientState(GL_COLOR_ARRAY);
 			glDisableClientState(GL_NORMAL_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glDisableVertexAttribArray(wave_amplitude_loc);
 
 			glDisable(GL_COLOR_MATERIAL);
 			glDisable(GL_LIGHTING);

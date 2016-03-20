@@ -10,9 +10,11 @@ attribute float wave_amplitude;
 void main()
 {
 	// Transforming The Vertex
-	vec4 vertex = gl_Vertex;
-	vertex.z += wave_amplitude * sin(1.f * vertex.x);
-	gl_Position = gl_ModelViewProjectionMatrix * vertex;
+	mat4 modelMatrix = invertView * gl_ModelViewMatrix;
+	mat4 viewProjectionMatrix = gl_ModelViewProjectionMatrix * inverse(modelMatrix);
+	vec4 worldVertex = modelMatrix * gl_Vertex;
+	worldVertex.z += wave_amplitude * sin(1.f * worldVertex.x);
+	gl_Position = viewProjectionMatrix * worldVertex;
 
 	// Transforming The Normal To ModelView-Space
 	normal = gl_NormalMatrix * gl_Normal;

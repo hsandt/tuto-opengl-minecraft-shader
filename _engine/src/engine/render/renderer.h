@@ -97,6 +97,9 @@ class NYRenderer
 		  */
 		void initialise(bool postProcess = false)
 		{
+			// initialize vertex/fragment shaders
+			initShadersCube();
+
 			_DoPostProcess = postProcess;
 
 			if(postProcess)
@@ -368,6 +371,7 @@ class NYRenderer
 				case GL_STACK_UNDERFLOW: Log::log(Log::ENGINE_ERROR,("Opengl error (GL_STACK_UNDERFLOW) for call " + toString(call)).c_str()); break;
 				case GL_OUT_OF_MEMORY: Log::log(Log::ENGINE_ERROR,("Opengl error (GL_OUT_OF_MEMORY) for call " + toString(call)).c_str()); break;
 				case GL_TABLE_TOO_LARGE: Log::log(Log::ENGINE_ERROR,("Opengl error (GL_TABLE_TOO_LARGE) for call " + toString(call)).c_str()); break;
+				case GL_INVALID_VALUE: Log::log(Log::ENGINE_ERROR,("Opengl error (GL_INVALID_VALUE) for call " + toString(call)).c_str()); break;
 				default : Log::log(Log::ENGINE_ERROR,("Unknown Opengl error for call " + toString(call)).c_str()); break; 
 				}
 			}

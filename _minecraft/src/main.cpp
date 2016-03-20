@@ -254,7 +254,9 @@ void renderObjects(void)
 	glUniformMatrix4fv(invView, 1, true, g_renderer->_Camera->_InvertViewMatrix.Mat.t);
 
 //	GLuint wave_amplitude_loc = glGetUniformLocation(g_renderer->_ProgramCube, "wave_amplitude");
+//	GLuint wave_amplitude_loc = glGetAttribLocation(g_renderer->_ProgramCube, "wave_amplitude");
 //	glUniform1f(wave_amplitude_loc, g_wave_amplitude);
+//	glVertexAttrib1f(wave_amplitude_loc, g_renderer->_Wave_amplitude);
 
 	glPushMatrix();
 	//　g_world->render_world_old_school();
