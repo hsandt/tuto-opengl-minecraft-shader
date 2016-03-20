@@ -20,7 +20,8 @@
 
 //Variable globale
 NYWorld * g_world;
-GLuint g_program;  // main shader program
+GLuint g_program;  // basic shader program
+GLuint g_program_water;  // water cube shader program
 
 NYRenderer * g_renderer = NULL;
 NYTimer * g_timer = NULL;
@@ -39,9 +40,11 @@ GUILabel * LabelCam = NULL;
 GUIScreen * g_screen_params = NULL;
 GUIScreen * g_screen_jeu = NULL;
 GUISlider * g_slider_ambient;
+GUISlider * g_slider_wave_amplitude;
 
 // Params
 float g_ambient = 0.5f;
+float g_wave_amplitude = 5.f;
 
 // Soleil
 //Soleil
@@ -241,17 +244,19 @@ void renderObjects(void)
 	//Au lieu de rendre notre cube dans sa sphère (mais on laisse le soleil)
 
 	// use loaded shader program
-	glUseProgram(g_program);
+	glUseProgram(g_program_water);
 	
-	GLuint elap = glGetUniformLocation(g_program, "elapsed");
+	GLuint elap = glGetUniformLocation(g_program_water, "elapsed");
 	glUniform1f(elap, NYRenderer::_DeltaTimeCumul);
 
-
-	GLuint amb = glGetUniformLocation(g_program, "ambientLevel");
+	GLuint amb = glGetUniformLocation(g_program_water, "ambientLevel");
 	glUniform1f(amb, g_ambient);
 	
-	GLuint invView = glGetUniformLocation(g_program, "invertView");
+	GLuint invView = glGetUniformLocation(g_program_water, "invertView");
 	glUniformMatrix4fv(invView, 1, true, g_renderer->_Camera->_InvertViewMatrix.Mat.t);
+
+	GLuint wave_amplitude_loc = glGetUniformLocation(g_program_water, "wave_amplitude");
+	glUniform1f(wave_amplitude_loc, g_wave_amplitude);
 
 	glPushMatrix();
 	//　g_world->render_world_old_school();
@@ -457,6 +462,7 @@ void mouseMoveFunction(int x, int y, bool pressed)
 	{
 		//Mise a jour des variables liées aux sliders
 		g_ambient = g_slider_ambient->Value;
+		g_wave_amplitude = g_slider_wave_amplitude->Value;
 	}
 
 	if (mouseTraite) return;
@@ -617,6 +623,7 @@ int main(int argc, char* argv[])
 
 	//Creation d'un programme de shader, avec vertex et fragment shaders
 	g_program = g_renderer->createProgram("../base/shaders/psbase.glsl", "../base/shaders/vsbase.glsl");
+	g_program_water = g_renderer->createProgram("../base/shaders/psbase.glsl", "../base/shaders/vswater.glsl");
 
 	//On applique la config du renderer
 	glViewport(0, 0, g_renderer->_ScreenWidth, g_renderer->_ScreenHeight);
@@ -677,6 +684,24 @@ int main(int argc, char* argv[])
 
 	y += g_slider_ambient->Height + 1;
 	y+=10;
+
+	label = new GUILabel();
+	label->X = x;
+	label->Y = y;
+	label->Text = "Water wave amplitude :";
+	g_screen_params->addElement(label);
+
+	y += label->Height + 1;
+
+	g_slider_wave_amplitude = new GUISlider();
+	g_slider_wave_amplitude->setPos(x, y);
+	g_slider_wave_amplitude->setMaxMin(10, 0);
+	g_slider_wave_amplitude->setValue(g_wave_amplitude);
+	g_slider_wave_amplitude->Visible = true;
+	g_screen_params->addElement(g_slider_wave_amplitude);
+
+	y += g_slider_wave_amplitude->Height + 1;
+	y += 10;
 
 	//Ecran a rendre
 	g_screen_manager->setActiveScreen(g_screen_jeu);
