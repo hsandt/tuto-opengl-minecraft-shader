@@ -5,7 +5,7 @@ varying vec4 color;
 uniform float elapsed;
 uniform mat4 invertView;
 
-uniform float wave_amplitude;
+attribute float wave_amplitude;
 
 void main()
 {

@@ -26,7 +26,11 @@ public :
 	int _MatriceHeights[MAT_SIZE_CUBES][MAT_SIZE_CUBES];
 	int _MatriceHeightsTmp[MAT_SIZE_CUBES][MAT_SIZE_CUBES];
 	float _FacteurGeneration;
-	
+	int _HeightDiffFactor = 1;  // max random height diff per XY distance
+
+	// CUSTOM
+	int _WaterLevel = 20;
+
 	NYTexFile * _TexGrass;
 
 	NYWorld()
@@ -128,7 +132,10 @@ public :
 		if (height - 1>0)
 		{
 			getCube(x, y, height - 1)->_Draw = true;
-			getCube(x, y, height - 1)->_Type = CUBE_HERBE;
+			
+			// ADDED: water under some level, grass else
+			NYCubeType cubeType = height < _WaterLevel ? NYCubeType::CUBE_EAU : NYCubeType::CUBE_HERBE;
+			getCube(x, y, height - 1)->_Type = cubeType;
 		}
 
 		for (int z = height; z<MAT_HEIGHT_CUBES; z++)
@@ -149,9 +156,10 @@ public :
 		if ((x3 - x1) <= 1 && (y3 - y1) <= 1)
 			return;
 
-		int largeurRandom = (int)(MAT_HEIGHT_CUBES / (prof*_FacteurGeneration));
-		if (largeurRandom == 0)
-			largeurRandom = 1;
+//		int largeurRandom = (int)(MAT_HEIGHT_CUBES / (prof*_FacteurGeneration));
+		int largeurRandom = _HeightDiffFactor * ((x3 - x1) + (y3 - y1))/2;
+//		if (largeurRandom == 0)
+//			largeurRandom = 1;
 
 		if (profMax >= 0 && prof >= profMax)
 		{
@@ -213,6 +221,7 @@ public :
 		if ((x3 - x1)>1 && (y3 - y1)>1)
 		{
 			int heighte = (heighta + heightb + heightc + heightd) / 4;
+			// we can keep same height diff in Manhattan distance
 			heighte += (rand() % largeurRandom) - (largeurRandom / 2);
 			load_pile(xe, ye, heighte);
 		}
@@ -289,7 +298,7 @@ public :
 			MAT_SIZE_CUBES-1,MAT_SIZE_CUBES-1,
 			0,MAT_SIZE_CUBES-1,1,profmax);
 
-		//lisse();
+		lisse();
 
 		for(int x=0;x<MAT_SIZE;x++)
 			for(int y=0;y<MAT_SIZE;y++)
