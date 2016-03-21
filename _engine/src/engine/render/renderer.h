@@ -417,13 +417,13 @@ class NYRenderer
 
 		void initShadersCube()
 		{
-			_ProgramCube = createProgram("../base/shaders/pscube.glsl", "../base/shaders/vscube.glsl");
+			_ProgramCube = createProgram("shaders/pscube.glsl", "shaders/vscube.glsl");
 		}
 
 		void initShadersPostProcess(void)
 		{
 			_ProgramPP = glCreateProgram();
-			GLuint shader = loadShader(GL_FRAGMENT_SHADER,"../base/shaders/postprocess/pshader.glsl");
+			GLuint shader = loadShader(GL_FRAGMENT_SHADER,"shaders/postprocess/pshader.glsl");
 			glAttachShader(_ProgramPP, shader);
 			checkGlError("glAttachShader(_ProgramPP, shader);");
 			glLinkProgram(_ProgramPP);

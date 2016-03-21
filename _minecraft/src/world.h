@@ -71,7 +71,7 @@ public :
 					_Chunks[x][y][z]->setVoisins(cxPrev,cxNext,cyPrev,cyNext,czPrev,czNext);
 				}
 
-		_TexGrass = NYTexManager::getInstance()->loadTexture(std::string("../base/textures/grass.png"));
+		_TexGrass = NYTexManager::getInstance()->loadTexture(std::string("textures/grass.png"));
 
 	}
 

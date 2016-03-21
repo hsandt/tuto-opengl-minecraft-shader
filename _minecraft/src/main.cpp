@@ -623,7 +623,7 @@ int main(int argc, char* argv[])
 	g_renderer->initialise();  // no post-process
 
 	//Creation d'un programme de shader, avec vertex et fragment shaders
-	g_program = g_renderer->createProgram("../base/shaders/psbase.glsl", "../base/shaders/vsbase.glsl");
+	g_program = g_renderer->createProgram("shaders/psbase.glsl", "shaders/vsbase.glsl");
 
 	//On applique la config du renderer
 	glViewport(0, 0, g_renderer->_ScreenWidth, g_renderer->_ScreenHeight);

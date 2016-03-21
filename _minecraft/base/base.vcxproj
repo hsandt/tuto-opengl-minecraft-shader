@@ -35,20 +35,11 @@
     <ClInclude Include="..\src\cube.h" />
     <ClInclude Include="..\src\world.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="textures\grass.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\postprocess\pshader.glsl" />
-    <None Include="shaders\psbase.glsl" />
-    <None Include="shaders\vsbase.glsl" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8531C627-6452-48A0-B4A8-40CCCC6376E1}</ProjectGuid>
     <RootNamespace>udock</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>base</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
