@@ -87,7 +87,7 @@ class NYChunk
 						if (_Cubes[x][y][z]._Draw && _Cubes[x][y][z]._Type != CUBE_AIR)
 						{
 							float color[3];
-							float wave_amplitude = 0.f;
+							float wave_factor = 0.f;
 
 							switch (_Cubes[x][y][z]._Type)
 							{
@@ -130,7 +130,7 @@ class NYChunk
 							if (_Cubes[x][y][z]._Type == CUBE_EAU && (cubeZNext == nullptr || cubeZNext->_Type == CUBE_AIR))
 							{
 								// parametered by slider, but since chunks are created at init, the slider alone does not work without reset/update chunk
-								wave_amplitude = NYRenderer::getInstance()->_Wave_amplitude;
+								wave_factor = 1.f;
 							}
 
 							//Premier QUAD (le z-)
@@ -273,7 +273,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 
 								// only vertices at Z+ receive wave, if any
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -293,7 +293,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 							}
 
 							//Troisieme QUAD (x-)
@@ -333,7 +333,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -352,7 +352,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -414,7 +414,7 @@ class NYChunk
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -433,7 +433,7 @@ class NYChunk
 								*ptNorm = 1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -512,7 +512,7 @@ class NYChunk
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -532,7 +532,7 @@ class NYChunk
 								*ptNorm = -1; ptNorm++;
 								*ptNorm = 0; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 							}
 
@@ -554,7 +554,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 								
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -574,7 +574,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -593,7 +593,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 
@@ -612,7 +612,7 @@ class NYChunk
 								*ptNorm = 0; ptNorm++;
 								*ptNorm = 1; ptNorm++;
 
-								*ptAttr = wave_amplitude; ptAttr++;
+								*ptAttr = wave_factor; ptAttr++;
 
 
 							}
@@ -660,6 +660,8 @@ class NYChunk
 				_NbVertices * SIZE_NORMAL,
 				_WorldNorm);
 
+			error = glGetError();
+
 			glBufferSubData(GL_ARRAY_BUFFER,
 				_NbVertices * SIZE_VERTICE +
 				_NbVertices * SIZE_COLOR +
@@ -688,7 +690,7 @@ class NYChunk
 			glEnable(GL_COLOR_MATERIAL);
 			glEnable(GL_LIGHTING);
 
-			//On bind le buuffer
+			//On bind le buffer
 			glBindBuffer(GL_ARRAY_BUFFER, _BufWorld);
 			NYRenderer::checkGlError("glBindBuffer");
 
@@ -697,8 +699,8 @@ class NYChunk
 			glEnableClientState(GL_COLOR_ARRAY);
 			glEnableClientState(GL_NORMAL_ARRAY);
 			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			GLuint wave_amplitude_loc = glGetAttribLocation(NYRenderer::getInstance()->_ProgramCube, "wave_amplitude");
-			glEnableVertexAttribArray(wave_amplitude_loc);
+			GLuint wave_factor_loc = glGetAttribLocation(NYRenderer::getInstance()->_ProgramCube, "wave_factor");
+			glEnableVertexAttribArray(wave_factor_loc);
 
 			//On place les pointeurs sur les datas, aux bons offsets
 			glVertexPointer(3, GL_FLOAT, 0, (void*)(0));
@@ -706,7 +708,7 @@ class NYChunk
 			glNormalPointer(GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR));
 			glTexCoordPointer(2, GL_FLOAT, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL));
 			// pointer on wave amplitude attribute data, so that earth and water blocks are drawn with the correct wave effect
-			glVertexAttribPointer(wave_amplitude_loc, 1, GL_FLOAT, GL_FALSE, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL + _NbVertices*SIZE_UV));
+			glVertexAttribPointer(wave_factor_loc, 1, GL_FLOAT, GL_FALSE, 0, (void*)(_NbVertices*SIZE_VERTICE + _NbVertices*SIZE_COLOR + _NbVertices*SIZE_NORMAL + _NbVertices*SIZE_UV));
 
 			//On demande le dessin
 			//glDrawArrays(GL_TRIANGLES, 0, _NbVertices);
@@ -716,7 +718,7 @@ class NYChunk
 			glDisableClientState(GL_COLOR_ARRAY);
 			glDisableClientState(GL_NORMAL_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			glDisableVertexAttribArray(wave_amplitude_loc);
+			glDisableVertexAttribArray(wave_factor_loc);
 
 			glDisable(GL_COLOR_MATERIAL);
 			glDisable(GL_LIGHTING);

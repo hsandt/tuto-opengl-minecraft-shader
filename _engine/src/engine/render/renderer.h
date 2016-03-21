@@ -48,7 +48,8 @@ class NYRenderer
 		static float _DeltaTimeCumul; ///< Temps écoulé depuis le lancement de l'appli
 
 		// Params
-		float _Wave_amplitude = 5.f;
+		float _WaveAmplitude = 5.f;
+		float _NormalizedWaveLength = 5.f;
 
 	private : 
 		static NYRenderer * _Me; ///< Singleton

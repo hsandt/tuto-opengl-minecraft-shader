@@ -5,7 +5,10 @@ varying vec4 color;
 uniform float elapsed;
 uniform mat4 invertView;
 
-attribute float wave_amplitude;
+uniform float wave_amplitude;
+uniform float normalized_wavelength;
+
+varying float wave_factor;  // 0 for no wave
 
 void main()
 {
@@ -13,7 +16,7 @@ void main()
 	mat4 modelMatrix = invertView * gl_ModelViewMatrix;
 	mat4 viewProjectionMatrix = gl_ModelViewProjectionMatrix * inverse(modelMatrix);
 	vec4 worldVertex = modelMatrix * gl_Vertex;
-	worldVertex.z += wave_amplitude * sin(1.f * worldVertex.x);
+	worldVertex.z += wave_factor * wave_amplitude * sin(2 * 3.14f * (worldVertex.x / 10.f) / normalized_wavelength);
 	gl_Position = viewProjectionMatrix * worldVertex;
 
 	// Transforming The Normal To ModelView-Space

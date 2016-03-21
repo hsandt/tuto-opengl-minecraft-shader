@@ -40,6 +40,7 @@ GUIScreen * g_screen_params = NULL;
 GUIScreen * g_screen_jeu = NULL;
 GUISlider * g_slider_ambient;
 GUISlider * g_slider_wave_amplitude;
+GUISlider * g_slider_normalized_wavelength;
 
 // Params
 float g_ambient = 0.5f;
@@ -253,10 +254,10 @@ void renderObjects(void)
 	GLuint invView = glGetUniformLocation(g_renderer->_ProgramCube, "invertView");
 	glUniformMatrix4fv(invView, 1, true, g_renderer->_Camera->_InvertViewMatrix.Mat.t);
 
-//	GLuint wave_amplitude_loc = glGetUniformLocation(g_renderer->_ProgramCube, "wave_amplitude");
-//	GLuint wave_amplitude_loc = glGetAttribLocation(g_renderer->_ProgramCube, "wave_amplitude");
-//	glUniform1f(wave_amplitude_loc, g_wave_amplitude);
-//	glVertexAttrib1f(wave_amplitude_loc, g_renderer->_Wave_amplitude);
+	GLuint wave_amplitude_loc = glGetUniformLocation(g_renderer->_ProgramCube, "wave_amplitude");
+	GLuint normalized_wavelength_loc = glGetAttribLocation(g_renderer->_ProgramCube, "normalized_wavelength");
+	glUniform1f(wave_amplitude_loc, g_renderer->_WaveAmplitude);
+	glUniform1f(normalized_wavelength_loc, g_renderer->_NormalizedWaveLength);
 
 	glPushMatrix();
 	//　g_world->render_world_old_school();
@@ -462,7 +463,8 @@ void mouseMoveFunction(int x, int y, bool pressed)
 	{
 		//Mise a jour des variables liées aux sliders
 		g_ambient = g_slider_ambient->Value;
-		g_renderer->_Wave_amplitude = g_slider_wave_amplitude->Value;
+		g_renderer->_WaveAmplitude = g_slider_wave_amplitude->Value;
+		g_renderer->_NormalizedWaveLength = g_slider_normalized_wavelength->Value;
 	}
 
 	if (mouseTraite) return;
@@ -670,7 +672,7 @@ int main(int argc, char* argv[])
 	GUILabel * label = new GUILabel();
 	label->X = x;
 	label->Y = y;
-	label->Text = "Ambient :";
+	label->Text = "Ambient:";
 	g_screen_params->addElement(label);
 
 	y += label->Height + 1;
@@ -688,7 +690,7 @@ int main(int argc, char* argv[])
 	label = new GUILabel();
 	label->X = x;
 	label->Y = y;
-	label->Text = "Water wave amplitude :";
+	label->Text = "Water wave amplitude:";
 	g_screen_params->addElement(label);
 
 	y += label->Height + 1;
@@ -696,11 +698,29 @@ int main(int argc, char* argv[])
 	g_slider_wave_amplitude = new GUISlider();
 	g_slider_wave_amplitude->setPos(x, y);
 	g_slider_wave_amplitude->setMaxMin(10, 0);
-	g_slider_wave_amplitude->setValue(g_renderer->_Wave_amplitude);
+	g_slider_wave_amplitude->setValue(g_renderer->_WaveAmplitude);
 	g_slider_wave_amplitude->Visible = true;
 	g_screen_params->addElement(g_slider_wave_amplitude);
 
 	y += g_slider_wave_amplitude->Height + 1;
+	y += 10;
+
+	label = new GUILabel();
+	label->X = x;
+	label->Y = y;
+	label->Text = "Normalized water wave length:";
+	g_screen_params->addElement(label);
+
+	y += label->Height + 1;
+
+	g_slider_normalized_wavelength = new GUISlider();
+	g_slider_normalized_wavelength->setPos(x, y);
+	g_slider_normalized_wavelength->setMaxMin(20, 0);
+	g_slider_normalized_wavelength->setValue(g_renderer->_NormalizedWaveLength);
+	g_slider_normalized_wavelength->Visible = true;
+	g_screen_params->addElement(g_slider_normalized_wavelength);
+
+	y += g_slider_normalized_wavelength->Height + 1;
 	y += 10;
 
 	//Ecran a rendre
