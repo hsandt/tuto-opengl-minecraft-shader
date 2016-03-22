@@ -255,9 +255,11 @@ void renderObjects(void)
 	glUniformMatrix4fv(invView, 1, true, g_renderer->_Camera->_InvertViewMatrix.Mat.t);
 
 	GLuint wave_amplitude_loc = glGetUniformLocation(g_renderer->_ProgramCube, "wave_amplitude");
-	GLuint normalized_wavelength_loc = glGetAttribLocation(g_renderer->_ProgramCube, "normalized_wavelength");
+	GLuint normalized_wavelength_loc = glGetUniformLocation(g_renderer->_ProgramCube, "normalized_wavelength");
+	GLuint wave_period_loc = glGetUniformLocation(g_renderer->_ProgramCube, "wave_period");
 	glUniform1f(wave_amplitude_loc, g_renderer->_WaveAmplitude);
 	glUniform1f(normalized_wavelength_loc, g_renderer->_NormalizedWaveLength);
+	glUniform1f(wave_period_loc, g_renderer->_WavePeriod);
 
 	glPushMatrix();
 	//　g_world->render_world_old_school();
@@ -496,12 +498,12 @@ void mouseMoveFunction(int x, int y, bool pressed)
 			NYVert3Df strafe = g_renderer->_Camera->_NormVec;
 			strafe.Z = 0;
 			strafe.normalize();
-			strafe *= (float)-dx / 50.0f;
+			strafe *= (float)-dx * 1.f;
 
 			NYVert3Df avance = g_renderer->_Camera->_Direction;
 			avance.Z = 0;
 			avance.normalize();
-			avance *= (float)dy / 50.0f;
+			avance *= (float)dy * 1.f;
 
 			g_renderer->_Camera->move(avance + strafe);
 		}
@@ -715,7 +717,7 @@ int main(int argc, char* argv[])
 
 	g_slider_normalized_wavelength = new GUISlider();
 	g_slider_normalized_wavelength->setPos(x, y);
-	g_slider_normalized_wavelength->setMaxMin(20, 0);
+	g_slider_normalized_wavelength->setMaxMin(20, 1);
 	g_slider_normalized_wavelength->setValue(g_renderer->_NormalizedWaveLength);
 	g_slider_normalized_wavelength->Visible = true;
 	g_screen_params->addElement(g_slider_normalized_wavelength);

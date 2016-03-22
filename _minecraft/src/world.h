@@ -110,6 +110,7 @@ public :
 	//only if zero permet de ne générer la  pile que si sa hauteur actuelle est de 0 (et ainsi de ne pas regénérer de piles existantes)
 	//Création d'une pile de cubes
 	//only if zero permet de ne générer la  pile que si sa hauteur actuelle est de 0 (et ainsi de ne pas regénérer de piles existantes)
+	// Fill with ground only here
 	void load_pile(int x, int y, int height, bool onlyIfZero = true)
 	{
 		if (height < 1)
@@ -120,22 +121,16 @@ public :
 		if (_MatriceHeights[x][y] != 0 && onlyIfZero)
 			return;
 
-		for (int z = 0; z<height; z++)
+		for (int z = 0; z < height; z++)
 		{
 			getCube(x, y, z)->_Draw = true;
-			if (z>0)
-				getCube(x, y, z)->_Type = CUBE_TERRE;
-			else
-				getCube(x, y, z)->_Type = CUBE_EAU;
+			getCube(x, y, z)->_Type = CUBE_TERRE;
 		}
 
-		if (height - 1>0)
+		if (height - 1 > 0)
 		{
 			getCube(x, y, height - 1)->_Draw = true;
-			
-			// ADDED: water under some level, grass else
-			NYCubeType cubeType = height < _WaterLevel ? NYCubeType::CUBE_EAU : NYCubeType::CUBE_HERBE;
-			getCube(x, y, height - 1)->_Type = cubeType;
+			getCube(x, y, height - 1)->_Type = NYCubeType::CUBE_HERBE;
 		}
 
 		for (int z = height; z<MAT_HEIGHT_CUBES; z++)
@@ -238,7 +233,7 @@ public :
 	//Penser à appeler la fonction a la fin de la génération (plusieurs fois si besoin)
 	void lisse(void)
 	{
-		int sizeWidow = 4;
+		int sizeWindow = 4;
 		memset(_MatriceHeightsTmp, 0x00, sizeof(int)*MAT_SIZE_CUBES*MAT_SIZE_CUBES);
 		for (int x = 0; x<MAT_SIZE_CUBES; x++)
 		{
@@ -246,11 +241,11 @@ public :
 			{
 				//on moyenne sur une distance
 				int nb = 0;
-				for (int i = (x - sizeWidow < 0 ? 0 : x - sizeWidow);
-				i < (x + sizeWidow >= MAT_SIZE_CUBES ? MAT_SIZE_CUBES - 1 : x + sizeWidow); i++)
+				for (int i = (x - sizeWindow < 0 ? 0 : x - sizeWindow);
+				i < (x + sizeWindow >= MAT_SIZE_CUBES ? MAT_SIZE_CUBES - 1 : x + sizeWindow); i++)
 				{
-					for (int j = (y - sizeWidow < 0 ? 0 : y - sizeWidow);
-					j <(y + sizeWidow >= MAT_SIZE_CUBES ? MAT_SIZE_CUBES - 1 : y + sizeWidow); j++)
+					for (int j = (y - sizeWindow < 0 ? 0 : y - sizeWindow);
+					j <(y + sizeWindow >= MAT_SIZE_CUBES ? MAT_SIZE_CUBES - 1 : y + sizeWindow); j++)
 					{
 						_MatriceHeightsTmp[x][y] += _MatriceHeights[i][j];
 						nb++;
@@ -269,8 +264,27 @@ public :
 				load_pile(x, y, _MatriceHeightsTmp[x][y], false);
 			}
 		}
+	}
 
-
+	/// Fill world with water until given level (0 for no water)
+	void fill_water(int level)
+	{
+		for (int x = 0; x < MAT_SIZE_CUBES; x++)
+		{
+			for (int y = 0; y < MAT_SIZE_CUBES; y++)
+			{
+				// only fill columns lower or at water level with water
+				if (_MatriceHeights[x][y] < _WaterLevel)
+				{
+					_MatriceHeights[x][y] = _WaterLevel;
+					for (int z = 0; z < _WaterLevel; z++)
+					{
+						getCube(x, y, z)->_Draw = true;
+						getCube(x, y, z)->_Type = CUBE_EAU;
+					}
+				}
+			}
+		}
 	}
 
 	void init_world(int profmax = -1)
@@ -299,7 +313,10 @@ public :
 			0,MAT_SIZE_CUBES-1,1,profmax);
 
 		lisse();
+		fill_water(_WaterLevel);
 
+		// disable cubes completely surrounded by other cubes
+		// do this before adding to VBO so that only visible cubes are added to the VBOs
 		for(int x=0;x<MAT_SIZE;x++)
 			for(int y=0;y<MAT_SIZE;y++)
 				for(int z=0;z<MAT_HEIGHT;z++)

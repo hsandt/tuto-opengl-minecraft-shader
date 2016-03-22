@@ -7,8 +7,9 @@ uniform mat4 invertView;
 
 uniform float wave_amplitude;
 uniform float normalized_wavelength;
+uniform float wave_period;
 
-varying float wave_factor;  // 0 for no wave
+attribute float wave_factor;  // 0 for no wave
 
 void main()
 {
@@ -16,7 +17,9 @@ void main()
 	mat4 modelMatrix = invertView * gl_ModelViewMatrix;
 	mat4 viewProjectionMatrix = gl_ModelViewProjectionMatrix * inverse(modelMatrix);
 	vec4 worldVertex = modelMatrix * gl_Vertex;
-	worldVertex.z += wave_factor * wave_amplitude * sin(2 * 3.14f * (worldVertex.x / 10.f) / normalized_wavelength);
+	// 2pi*(x/L - t/T)
+	float angle = 2 * 3.14f * ((worldVertex.x / 10.f) / normalized_wavelength - elapsed / wave_period);
+	worldVertex.z += wave_factor * wave_amplitude * sin(angle);
 	gl_Position = viewProjectionMatrix * worldVertex;
 
 	// Transforming The Normal To ModelView-Space

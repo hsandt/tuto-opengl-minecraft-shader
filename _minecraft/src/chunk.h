@@ -84,12 +84,14 @@ class NYChunk
 				{
 					for (int z = 0; z<CHUNK_SIZE; z++)
 					{
-						if (_Cubes[x][y][z]._Draw && _Cubes[x][y][z]._Type != CUBE_AIR)
+						NYCube cube = _Cubes[x][y][z];
+
+						if (cube._Draw && cube._Type != CUBE_AIR)
 						{
 							float color[3];
 							float wave_factor = 0.f;
 
-							switch (_Cubes[x][y][z]._Type)
+							switch (cube._Type)
 							{
 							case CUBE_TERRE:
 								color[0] = 101.0f / 255.0f;
@@ -127,7 +129,7 @@ class NYChunk
 								&cubeZPrev, &cubeZNext);
 
 							// only apply wave effect for water surface, and on concerned vertices
-							if (_Cubes[x][y][z]._Type == CUBE_EAU && (cubeZNext == nullptr || cubeZNext->_Type == CUBE_AIR))
+							if (cube._Type == CUBE_EAU && (cubeZNext == nullptr || cubeZNext->_Type == CUBE_AIR))
 							{
 								// parametered by slider, but since chunks are created at init, the slider alone does not work without reset/update chunk
 								wave_factor = 1.f;
@@ -217,7 +219,9 @@ class NYChunk
 
 
 							//Second QUAD (x+)
-							if (cubeXNext == NULL || cubeXNext->isSolid() == false)
+							// because of water wave, do not hide side quads for water
+							// we assume lower water cubes are already hidden
+							if (cubeXNext == NULL || cubeXNext->isSolid() == false || cube._Type == CUBE_EAU)
 							{
 								*ptVert = xPos + NYCube::CUBE_SIZE; ptVert++;
 								*ptVert = yPos; ptVert++;
@@ -297,7 +301,7 @@ class NYChunk
 							}
 
 							//Troisieme QUAD (x-)
-							if (cubeXPrev == NULL || cubeXPrev->isSolid() == false)
+							if (cubeXPrev == NULL || cubeXPrev->isSolid() == false || cube._Type == CUBE_EAU)
 							{
 								*ptVert = xPos; ptVert++;
 								*ptVert = yPos; ptVert++;
@@ -378,7 +382,7 @@ class NYChunk
 
 
 							//Quatrieme QUAD (y+)
-							if (cubeYNext == NULL || cubeYNext->isSolid() == false)
+							if (cubeYNext == NULL || cubeYNext->isSolid() == false || cube._Type == CUBE_EAU)
 							{
 								*ptVert = xPos; ptVert++;
 								*ptVert = yPos + NYCube::CUBE_SIZE; ptVert++;
@@ -458,7 +462,7 @@ class NYChunk
 							}
 
 							//Cinquieme QUAD (y-)
-							if (cubeYPrev == NULL || cubeYPrev->isSolid() == false)
+							if (cubeYPrev == NULL || cubeYPrev->isSolid() == false || cube._Type == CUBE_EAU)
 							{
 								*ptVert = xPos; ptVert++;
 								*ptVert = yPos; ptVert++;
@@ -779,6 +783,8 @@ class NYChunk
 			NYCube * cubeZPrev = NULL; 
 			NYCube * cubeZNext = NULL; 
 
+			NYCube cube = _Cubes[x][y][z];
+
 			get_surrounding_cubes(
 				x, y, z,
 				&cubeXPrev, &cubeXNext,
@@ -790,13 +796,29 @@ class NYChunk
 				cubeZPrev == NULL || cubeZNext == NULL )
 				return false;
 
-			if( cubeXPrev->isSolid() == true && //droite
-				cubeXNext->isSolid() == true && //gauche
-				cubeYPrev->isSolid() == true && //haut
-				cubeYNext->isSolid() == true && //bas
-				cubeZPrev->isSolid() == true && //devant
-				cubeZNext->isSolid() == true )  //derriere
-				return true;
+			// cacher cube si entourer de 6 cubes solides
+			// ou si cube d'eau sous un autre cube d'eau (effet de transparence maintenu par surface suffit)
+			// marche bien pour surface d'eau plane (voire ondulee), sinon (waterfall...) a retravailler
+			if (cube._Type == NYCubeType::CUBE_EAU) 
+			{
+				if ((cubeXPrev->isSolid() == true || cubeZNext->_Type == NYCubeType::CUBE_EAU) && //droite
+					(cubeXNext->isSolid() == true || cubeXNext->_Type == NYCubeType::CUBE_EAU) && //gauche
+					(cubeYPrev->isSolid() == true || cubeYPrev->_Type == NYCubeType::CUBE_EAU) && //devant
+					(cubeYNext->isSolid() == true || cubeYNext->_Type == NYCubeType::CUBE_EAU) && //derriere
+					(cubeZPrev->isSolid() == true || cubeZPrev->_Type == NYCubeType::CUBE_EAU) && //dessous
+					(cubeZNext->isSolid() == true || cubeZNext->_Type == NYCubeType::CUBE_EAU))
+					return true;
+			}
+
+			else
+				if( cubeXPrev->isSolid() == true && //droite
+					cubeXNext->isSolid() == true && //gauche
+					cubeYPrev->isSolid() == true && //devant
+					cubeYNext->isSolid() == true && //derriere
+					cubeZPrev->isSolid() == true && //dessous
+					cubeZNext->isSolid() == true)  //dessus
+					return true;
+
 			return false;
 		}
 
